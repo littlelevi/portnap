@@ -1,0 +1,131 @@
+#!/bin/sh
+
+#PORTDIR="/usr/ports"
+PORTDIR="/Fake/directory/for/testing"
+FREEBSD_GIT="https://git.FreeBSD.org/ports.git"
+
+# ------
+
+PORTDIR_MSG="Directory PORTDIR: $PORTDIR" 
+YEAR=$(date +'%Y')
+
+portDirEmpty() {
+    if [ -n "$(find $PORTDIR -d 0 -type d -empty)" ]
+        then return 0; else return 1; fi
+}
+
+portDirExist() {
+    if [ -d "$PORTDIR" ]    
+        then return 0; else return 1; fi
+}
+
+paseFullFormat() {
+    if echo "$1" | grep -Eq '^[0-9]{4}Q[1-4]$'
+        then return 0; else return 1; fi
+}
+
+parseSimpleFormat() {
+    if echo "$1" | grep -Eq '^Q[1-4]$'
+        then return 0; else return 1; fi
+}
+
+auto() {
+    if portDirExist; then
+        echo "$PORTDIR_MSG - exist."
+        if portDirEmpty; then
+            echo "$PORTDIR_MSG - is empty."
+            echo "Cloning Ports tree."
+            git clone "$FREEBSD_GIT" "$PORTDIR"
+        else
+            echo "$PORTDIR_MSG - is not empty."
+            echo "Updating Ports tree."
+            git -C "$PORTDIR" pull
+        fi
+    
+    else
+        echo "$PORTDIR_MSG - doesn't exist."
+    fi
+}
+
+validFormatMsg() {
+    echo "Examples of valid branch format $YEAR@4 or only Q1,Q2,Q3,Q4."
+}
+
+fetch() {
+    if  [ -n "$1" ]; then        
+        if parseSimpleFormat "$1"; then
+            if portDirEmpty; then
+                echo "$PORTDIR_MSG - is empty."
+                echo "Fetching Ports tree $YEAR$1"
+                git clone "$FREEBSD_GIT" -b "$YEAR$1" "$PORTDIR"
+            else
+                echo "$PORTDIR_MSG is not empty. Can't pull $YEAR$1 branch."
+                echo "Maybe you want to use \"switch\" instead ?"
+            fi
+        
+        elif paseFullFormat "$1"; then
+            if portDirEmpty; then
+                echo "$PORTDIR_MSG - is empty."
+                echo "Fetching Ports tree $1"
+                git clone "$FREEBSD_GIT" -b "$1" "$PORTDIR"
+            else
+                echo "$PORTDIR_MSG is not empty. Can't pull $1 branch."
+                echo "Maybe you want to use \"switch\" instead ?"
+            fi
+            
+        else
+            validFormatMsg
+        fi
+        
+    else
+        auto
+    fi
+}
+
+checkForGit() {
+    if [ ! -e /usr/local/bin/git ]; then
+        echo "Please install Git first."
+        exit 1
+    fi
+}
+
+switch() {
+    if  [ -n "$1" ]; then        
+        if parseSimpleFormat "$1"; then
+            echo "Switching to $YEAR$1"
+            git -C "$PORTDIR" switch "$YEAR$1"
+            
+        elif paseFullFormat "$1"; then
+            echo "Switching to $1"
+            git -C "$PORTDIR" switch "$1"
+        else
+            validFormatMsg
+        fi
+        
+    else
+        echo "No branch selected."
+        validFormatMsg
+    fi
+}
+
+handleFrontend() {
+    case "$1" in
+        "auto")
+            auto
+            ;;
+        "switch")
+            switch "$2"
+            ;;
+        "fetch")
+            fetch "$2"
+            ;;
+        *)
+            echo "Unknown or no argument."
+            ;;
+    esac
+}
+
+# -----------------------------
+        
+checkForGit
+handleFrontend "$1" "$2"
