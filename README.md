@@ -1,5 +1,5 @@
 # portnap
-portnap is a simple replacement for the discontinued FreeBSD portsnap, acting as a git wrapper.
+portnap is a simple replacement for the discontinued FreeBSD portsnap, acting as simple and convinient git wrapper.
 
 # Usage & Config
 Portnap accepts 3 parameters.
