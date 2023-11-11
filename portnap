@@ -19,7 +19,7 @@ portDirExist() {
         then return 0; else return 1; fi
 }
 
-paseFullFormat() {
+parseFullFormat() {
     if echo "$1" | grep -Eq '^[0-9]{4}Q[1-4]$'
         then return 0; else return 1; fi
 }
@@ -63,7 +63,7 @@ fetch() {
                 echo "Maybe you want to use \"switch\" instead ?"
             fi
         
-        elif paseFullFormat "$1"; then
+        elif parseFullFormat "$1"; then
             if portDirEmpty; then
                 echo "$PORTDIR_MSG - is empty."
                 echo "Fetching Ports tree $1"
@@ -95,7 +95,7 @@ switch() {
             echo "Switching to $YEAR$1"
             git -C "$PORTDIR" switch "$YEAR$1"
             
-        elif paseFullFormat "$1"; then
+        elif parseFullFormat "$1"; then
             echo "Switching to $1"
             git -C "$PORTDIR" switch "$1"
         else
