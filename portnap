@@ -29,6 +29,12 @@ parseSimpleFormat() {
         then return 0; else return 1; fi
 }
 
+overwritePortdir() {
+    if  [ -n "$1" ]; then
+        PORTDIR="$1"
+    if
+}
+
 auto() {
     if portDirExist; then
         echo "$PORTDIR_MSG - exist."
