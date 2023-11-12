@@ -32,7 +32,7 @@ parseSimpleFormat() {
 overwritePortdir() {
     if  [ -n "$1" ]; then
         PORTDIR="$1"
-    if
+    fi
 }
 
 auto() {
