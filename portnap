@@ -145,21 +145,22 @@ fi
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    auto)
+    "auto")
         auto
         shift 1
       ;;
 #----------------------------------
-    fetch)
+    "fetch")
       if [ "$#" -gt 1 ]; then
         fetch "$2"
         shift 2
       else
         auto
+        shift 1
       fi
       ;;
 #----------------------------------
-    switch)
+    "switch")
       if [ "$#" -gt 1 ]; then
         switch "$2"
         shift 2
@@ -170,7 +171,7 @@ while [ "$#" -gt 0 ]; do
       fi
       ;;
 #----------------------------------
-    -p)
+    "-p")
       if [ "$#" -gt 1 ]; then
         overwritePortdir "$2"
         shift 2
