@@ -130,7 +130,7 @@ help() {
     echo "Usage: portnap [path] <command> [branch]"
     echo " "
     echo "Options:"
-    echo "  -p portsdir  -- Location of ports tree (default: $PORTDIR)"
+    echo "  -p portsdir  -- Location of ports tree (default: /usr/ports)"
     echo " "
     echo "Commands:"
     echo "  auto     -- Fetch updates, and either clone a new ports tree or update an existing tree."
