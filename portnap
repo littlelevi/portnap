@@ -1,22 +1,23 @@
 #!/bin/sh
 
-#PORTDIR="/usr/ports"
-PORTDIR="/Fake/directory/for/testing"
+PORTDIR="/usr/ports"
 FREEBSD_GIT="https://git.FreeBSD.org/ports.git"
 
-# ------
+#----------------------------------
 
 PORTDIR_MSG="Directory PORTDIR: $PORTDIR" 
 YEAR=$(date +'%Y')
 
 portDirEmpty() {
-    if [ -n "$(find $PORTDIR -d 0 -type d -empty)" ]
+    if [ -n "$(find "$PORTDIR" -d 0 -type d -empty)" ]
         then return 0; else return 1; fi
 }
 
 portDirExist() {
-    if [ -d "$PORTDIR" ]    
-        then return 0; else return 1; fi
+    if [ ! -d "$PORTDIR" ]; then
+        echo "$PORTDIR_MSG - doesn't exist."
+        exit 1
+    fi
 }
 
 parseFullFormat() {
@@ -29,62 +30,69 @@ parseSimpleFormat() {
         then return 0; else return 1; fi
 }
 
+parsePath() {
+    if echo "$1" | grep -Eq '^(/[^/ ]*)+/?$'
+        then return 0; else return 1; fi
+}
+
 overwritePortdir() {
-    if  [ -n "$1" ]; then
+    if parsePath "$1"; then
         PORTDIR="$1"
+        PORTDIR_MSG="Directory PORTDIR: $PORTDIR"
+    else
+        echo "Invalid path: $1"
+        exit 1
     fi
 }
 
 auto() {
-    if portDirExist; then
-        echo "$PORTDIR_MSG - exist."
+    portDirExist
+    echo "$PORTDIR_MSG - exist."
         if portDirEmpty; then
             echo "$PORTDIR_MSG - is empty."
             echo "Cloning Ports tree."
             git clone "$FREEBSD_GIT" "$PORTDIR"
         else
             echo "$PORTDIR_MSG - is not empty."
+            git branch "$PORTDIR"
             echo "Updating Ports tree."
             git -C "$PORTDIR" pull
         fi
-    
-    else
-        echo "$PORTDIR_MSG - doesn't exist."
-    fi
 }
 
 validFormatMsg() {
-    echo "Examples of valid branch format $YEAR@4 or only Q1,Q2,Q3,Q4."
+    echo "Examples of valid branch format are $YEAR@4 or just Q1,Q2,Q3,Q4."
 }
 
 fetch() {
-    if  [ -n "$1" ]; then        
-        if parseSimpleFormat "$1"; then
-            if portDirEmpty; then
-                echo "$PORTDIR_MSG - is empty."
-                echo "Fetching Ports tree $YEAR$1"
-                git clone "$FREEBSD_GIT" -b "$YEAR$1" "$PORTDIR"
-            else
-                echo "$PORTDIR_MSG is not empty. Can't pull $YEAR$1 branch."
-                echo "Maybe you want to use \"switch\" instead ?"
-            fi
-        
-        elif parseFullFormat "$1"; then
-            if portDirEmpty; then
-                echo "$PORTDIR_MSG - is empty."
-                echo "Fetching Ports tree $1"
-                git clone "$FREEBSD_GIT" -b "$1" "$PORTDIR"
-            else
-                echo "$PORTDIR_MSG is not empty. Can't pull $1 branch."
-                echo "Maybe you want to use \"switch\" instead ?"
-            fi
-            
+    portDirExist
+    if parseSimpleFormat "$1"; then
+        if portDirEmpty; then
+            echo "$PORTDIR_MSG - is empty."
+            echo "Fetching Ports tree $YEAR$1"
+            git clone "$FREEBSD_GIT" -b "$YEAR$1" "$PORTDIR"
         else
-            validFormatMsg
+            echo "$PORTDIR_MSG - is not empty."
+            git -C "$PORTDIR" branch
+            echo "Updating Ports tree."
+            git -C "$PORTDIR" pull origin "$YEAR$1"
         fi
-        
+
+    elif parseFullFormat "$1"; then
+        if portDirEmpty; then
+            echo "$PORTDIR_MSG - is empty."
+            echo "Fetching Ports tree $1"
+            git clone "$FREEBSD_GIT" -b "$1" "$PORTDIR"
+        else
+            echo "$PORTDIR_MSG - is not empty."
+            git -C "$PORTDIR" branch
+            echo "Updating Ports tree."
+            git -C "$PORTDIR" pull origin "$1"
+        fi
+
     else
-        auto
+        validFormatMsg
+        exit 1
     fi
 }
 
@@ -96,54 +104,84 @@ checkForGit() {
 }
 
 switch() {
-    if  [ -n "$1" ]; then        
-        if parseSimpleFormat "$1"; then
-            echo "Switching to $YEAR$1"
-            git -C "$PORTDIR" switch "$YEAR$1"
+    if parseSimpleFormat "$1"; then
+        echo "Switching to $YEAR$1"
+        git -C "$PORTDIR" switch "$YEAR$1"
             
-        elif parseFullFormat "$1"; then
-            echo "Switching to $1"
-            git -C "$PORTDIR" switch "$1"
-        else
-            validFormatMsg
-        fi
-        
+    elif parseFullFormat "$1"; then
+        echo "Switching to $1"
+        git -C "$PORTDIR" switch "$1"
     else
-        echo "No branch selected."
-        validFormatMsg
+         validFormatMsg
+         exit 1
     fi
 }
 
-handleFrontend() {
-    case "$1" in
-        "auto")
-            auto
-            ;;
-        "switch")
-            switch "$2"
-            ;;
-        "fetch")
-            fetch "$2"
-            ;;
-        *)
-            echo ""
-            echo "Usage: portnap <command> [branch]"
-            echo " "
-            echo "Options:"
-            echo "  -p portsdir  -- Location of ports tree (default: $PORTDIR)"
-            echo " "
-            echo "Commands:"
-            echo "  auto     -- Fetch updates, and either clone a new ports tree or update an existing tree."
-            echo "  fetch    -- Same as auto but also allows you to select a specific branch. Where the branch is in <yyyyQx> or <Qx> format."
-            echo "  switch   -- Change ports tree branch, where the branch is in <yyyyQx> or <Qx> format."
-            echo " "
-            echo "Examples:"
-            echo "  portnap fetch Q3  -- Clone or pull ports tree from third quarter of current year."
-            ;;
-    esac
+help() {
+    echo ""
+    echo "Usage: portnap [path] <command> [branch]"
+    echo " "
+    echo "Options:"
+    echo "  -p portsdir  -- Location of ports tree (default: $PORTDIR)"
+    echo " "
+    echo "Commands:"
+    echo "  auto     -- Fetch updates, and either clone a new ports tree or update an existing tree."
+    echo "  fetch    -- Same as auto but also allows you to select a specific branch. Where the branch is in <yyyyQx> or <Qx> format."
+    echo "  switch   -- Change ports tree branch, where the branch is in <yyyyQx> or <Qx> format."
+    echo " "
+    echo "Examples:"
+    echo "  portnap fetch Q3  -- Clone or pull ports tree from third quarter of current year."
+    echo "  portnap -p /usr/local/poudriere/acme/usr/ports auto -- Clone or pull ports tree to alternative directory."
+    exit 0
 }
 
-# -----------------------------
-        
+#----------------------------------
+
 checkForGit
-handleFrontend "$1" "$2"
+
+if [ "$#" -eq 0 ]; then
+    help
+fi
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    auto)
+        auto
+        shift 1
+      ;;
+#----------------------------------
+    fetch)
+      if [ "$#" -gt 1 ]; then
+        fetch "$2"
+        shift 2
+      else
+        auto
+      fi
+      ;;
+#----------------------------------
+    switch)
+      if [ "$#" -gt 1 ]; then
+        switch "$2"
+        shift 2
+      else
+        echo "Please provide branch name of $1."
+        validFormatMsg
+        exit 1
+      fi
+      ;;
+#----------------------------------
+    -p)
+      if [ "$#" -gt 1 ]; then
+        overwritePortdir "$2"
+        shift 2
+      else
+        echo "No path provided for $1 flag."
+        exit 1
+      fi
+      ;;
+#----------------------------------
+    *)
+      help
+      ;;
+  esac
+done
