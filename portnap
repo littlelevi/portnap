@@ -3,6 +3,8 @@
 PORTDIR="/usr/ports"
 FREEBSD_GIT="https://git.FreeBSD.org/ports.git"
 
+COMMAND="0"
+#QUARTAL="0"
 #----------------------------------
 
 PORTDIR_MSG="Directory PORTDIR: $PORTDIR" 
@@ -45,14 +47,31 @@ overwritePortdir() {
     fi
 }
 
+isFlag() {
+    if echo "$1" | grep -Eq '^-[a-zA-Z]+$'
+        then return 0; else return 1; fi
+}
+
+debug() {
+    echo ""
+    printf "\033[0;31m"
+    echo "DEBUG: ---- "$1" --- "$2" --- "$PORTDIR" ---- "
+    printf "\033[0m"
+    echo ""
+}
+
 auto() {
     portDirExist
     echo "$PORTDIR_MSG - exist."
         if portDirEmpty; then
+
+        debug "Auto Empty"
             echo "$PORTDIR_MSG - is empty."
             echo "Cloning Ports tree."
             git clone "$FREEBSD_GIT" "$PORTDIR"
         else
+
+        debug "Auto Not Empty"
             echo "$PORTDIR_MSG - is not empty."
             git branch "$PORTDIR"
             echo "Updating Ports tree."
@@ -63,15 +82,16 @@ auto() {
 validFormatMsg() {
     echo "Examples of valid branch format are $YEAR@4 or just Q1,Q2,Q3,Q4."
 }
-
 fetch() {
     portDirExist
     if parseSimpleFormat "$1"; then
         if portDirEmpty; then
+        debug "Fetch Simple Empty" "$1"
             echo "$PORTDIR_MSG - is empty."
             echo "Fetching Ports tree $YEAR$1"
             git clone "$FREEBSD_GIT" -b "$YEAR$1" "$PORTDIR"
         else
+        debug "Fetch Simple not empty" "$1"
             echo "$PORTDIR_MSG - is not empty."
             git -C "$PORTDIR" branch
             echo "Updating Ports tree."
@@ -80,10 +100,12 @@ fetch() {
 
     elif parseFullFormat "$1"; then
         if portDirEmpty; then
+            debug "Fetch Full empty"
             echo "$PORTDIR_MSG - is empty."
             echo "Fetching Ports tree $1"
             git clone "$FREEBSD_GIT" -b "$1" "$PORTDIR"
         else
+            debug "Fetch Full not empty"
             echo "$PORTDIR_MSG - is not empty."
             git -C "$PORTDIR" branch
             echo "Updating Ports tree."
@@ -146,23 +168,31 @@ fi
 while [ "$#" -gt 0 ]; do
   case "$1" in
     "auto")
-        auto
+        COMMAND="A"
         shift 1
       ;;
 #----------------------------------
     "fetch")
       if [ "$#" -gt 1 ]; then
-        fetch "$2"
-        shift 2
+        if ! ifFlag "$2"; then
+        # if [ "$2" != "-p" ]; then
+          COMMAND="F"
+          QUARTAL="$2"
+          shift 2
+        else
+          COMMAND="F"
+          shift 1
+        fi
       else
-        auto
+        COMMAND="F"
         shift 1
       fi
       ;;
 #----------------------------------
     "switch")
       if [ "$#" -gt 1 ]; then
-        switch "$2"
+        COMMAND="S"
+        QUARTAL="$2"
         shift 2
       else
         echo "Please provide branch name of $1."
@@ -186,3 +216,28 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+#----------------------------------
+
+case "$COMMAND" in
+    
+    "A")
+        auto
+        ;;
+    "F")
+        if [ -n "$QUARTAL" ]; then
+            fetch "$QUARTAL"
+        else
+            auto
+        fi
+        ;;
+    "S")
+        if [ -n "$QUARTAL" ]; then
+            switch "$QUARTAL"
+        fi
+        ;;
+    *)
+        exit 1
+        ;;
+
+esac
