@@ -136,6 +136,7 @@ help() {
     echo "  auto     -- Fetch updates, and either clone a new ports tree or update an existing tree."
     echo "  fetch    -- Same as auto but also allows you to select a specific branch. Where the branch is in <yyyyQx> or <Qx> format."
     echo "  switch   -- Change ports tree branch, where the branch is in <yyyyQx> or <Qx> format."
+    echo "  help     -- Print this help information."
     echo " "
     echo "Examples:"
     echo "  portnap fetch Q3  -- Clone or pull ports tree from third quarter of current year."
@@ -197,7 +198,11 @@ while [ "$#" -gt 0 ]; do
       fi
       ;;
 #----------------------------------
+    "help")
+      help
+      ;;
     *)
+#----------------------------------
       help
       ;;
   esac
