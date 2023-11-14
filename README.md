@@ -1,14 +1,17 @@
 # Portnap
+
 portnap is a simple replacement for the discontinued FreeBSD portsnap, acting as convinient git wrapper.
 
 # Tldr
+
 `portnap auto` In most cases, it's all what you need.
 
 # Usage
 
-Usage: portnap `[path] <command> [branch]`
+Usage: `portnap [path] <command> [branch]`
 
 ## Options
+
 `-p` portsdir  -- Location of ports tree (default: /usr/ports/)
 
 ## Commands
@@ -19,6 +22,7 @@ Usage: portnap `[path] <command> [branch]`
 `help`     -- Print this help information. <br/>
 
 ## Examples
+
 `portnap fetch Q3`  -- Clone or pull ports tree from third quarter of current year. <br/>
 `portnap -p /usr/local/poudriere/acme/usr/ports auto` -- Clone or pull ports tree to alternative directory.
 
