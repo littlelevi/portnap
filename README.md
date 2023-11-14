@@ -16,6 +16,7 @@ Usage: portnap `[path] <command> [branch]`
 `auto`     -- Fetch updates, and either clone a new ports tree or update an existing tree. <br/>
 `fetch`    -- Same as auto but also allows you to select a specific branch. <br/> Where the branch is in `<yyyyQx>` or `<Qx>` format. <br/>
 `switch`   -- Change ports tree branch, where the branch is in `<yyyyQx>` or `<Qx>` format. <br/>
+`help`     -- Print this help information. <br/>
 
 ## Examples
 `portnap fetch Q3`  -- Clone or pull ports tree from third quarter of current year. <br/>
