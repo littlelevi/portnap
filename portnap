@@ -3,8 +3,6 @@
 PORTDIR="/usr/ports"
 FREEBSD_GIT="https://git.FreeBSD.org/ports.git"
 
-COMMAND="0"
-#QUARTAL="0"
 #----------------------------------
 
 PORTDIR_MSG="Directory PORTDIR: $PORTDIR" 
@@ -162,7 +160,6 @@ while [ "$#" -gt 0 ]; do
     "fetch")
       if [ "$#" -gt 1 ]; then
         if ! isFlag "$2"; then
-        # if [ "$2" != "-p" ]; then
           COMMAND="F"
           QUARTAL="$2"
           shift 2
