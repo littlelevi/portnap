@@ -26,4 +26,7 @@ Usage: `portnap [path] <command> [branch]`
 `portnap fetch Q3`  -- Clone or pull ports tree from third quarter of current year. <br/>
 `portnap -p /usr/local/poudriere/acme/usr/ports auto` -- Clone or pull ports tree to alternative directory.
 
+# Port repo
+
+https://github.com/littlelevi/portnap-port/tree/main
 
