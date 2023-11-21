@@ -4,7 +4,7 @@ PORTDIR="/usr/ports"
 FREEBSD_GIT="https://git.FreeBSD.org/ports.git"
 
 #----------------------------------
-PORTDIR_MSG="Ports directory: $PORTDIR"
+PORTDIR_MSG="Ports directory: '$PORTDIR'"
 
 YEAR=$(date +'%Y')
 
@@ -38,7 +38,7 @@ parsePath() {
 overwritePortdir() {
     if parsePath "$1"; then
         PORTDIR="$1"
-        PORTDIR_MSG="Ports directory: $PORTDIR"
+        PORTDIR_MSG="Ports directory: '$PORTDIR'"
     else
         echo "Invalid path: $1"
         exit 1
