@@ -4,8 +4,8 @@ PORTDIR="/usr/ports"
 FREEBSD_GIT="https://git.FreeBSD.org/ports.git"
 
 #----------------------------------
+PORTDIR_MSG="Ports directory: $PORTDIR"
 
-PORTDIR_MSG="Directory PORTDIR: $PORTDIR" 
 YEAR=$(date +'%Y')
 
 portDirEmpty() {
@@ -38,7 +38,7 @@ parsePath() {
 overwritePortdir() {
     if parsePath "$1"; then
         PORTDIR="$1"
-        PORTDIR_MSG="Directory PORTDIR: $PORTDIR"
+        PORTDIR_MSG="Ports directory: $PORTDIR"
     else
         echo "Invalid path: $1"
         exit 1
@@ -55,12 +55,12 @@ auto() {
     echo "$PORTDIR_MSG - exist."
         if portDirEmpty; then
 
-            echo "$PORTDIR_MSG - is empty."
+            echo "$PORTDIR_MSG - empty."
             echo "Cloning Ports tree."
             git clone "$FREEBSD_GIT" "$PORTDIR"
         else
 
-            echo "$PORTDIR_MSG - is not empty."
+            echo "$PORTDIR_MSG - not empty."
             git branch "$PORTDIR"
             echo "Updating Ports tree."
             git -C "$PORTDIR" pull
@@ -75,11 +75,11 @@ fetch() {
     portDirExist
     if parseSimpleFormat "$1"; then
         if portDirEmpty; then
-            echo "$PORTDIR_MSG - is empty."
+            echo "$PORTDIR_MSG - empty."
             echo "Fetching Ports tree $YEAR$1"
             git clone "$FREEBSD_GIT" -b "$YEAR$1" "$PORTDIR"
         else
-            echo "$PORTDIR_MSG - is not empty."
+            echo "$PORTDIR_MSG - not empty."
             git -C "$PORTDIR" branch
             echo "Updating Ports tree."
             git -C "$PORTDIR" pull origin "$YEAR$1"
@@ -87,11 +87,11 @@ fetch() {
 
     elif parseFullFormat "$1"; then
         if portDirEmpty; then
-            echo "$PORTDIR_MSG - is empty."
+            echo "$PORTDIR_MSG - empty."
             echo "Fetching Ports tree $1"
             git clone "$FREEBSD_GIT" -b "$1" "$PORTDIR"
         else
-            echo "$PORTDIR_MSG - is not empty."
+            echo "$PORTDIR_MSG - not empty."
             git -C "$PORTDIR" branch
             echo "Updating Ports tree."
             git -C "$PORTDIR" pull origin "$1"
@@ -180,7 +180,7 @@ while [ "$#" -gt 0 ]; do
         QUARTAL="$2"
         shift 2
       else
-        echo "Please provide branch name of $1."
+        echo "Please provide branch name for $1."
         validFormatMsg
         exit 1
       fi
