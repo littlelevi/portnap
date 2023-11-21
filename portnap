@@ -40,7 +40,7 @@ overwritePortdir() {
         PORTDIR="$1"
         PORTDIR_MSG="Ports directory: '$PORTDIR'"
     else
-        echo "Invalid path: $1"
+        echo "Invalid path: '$1'"
         exit 1
     fi
 }
@@ -112,11 +112,11 @@ checkForGit() {
 
 switch() {
     if parseSimpleFormat "$1"; then
-        echo "Switching to $YEAR$1"
+        echo "Switching to '$YEAR$1'"
         git -C "$PORTDIR" switch "$YEAR$1"
             
     elif parseFullFormat "$1"; then
-        echo "Switching to $1"
+        echo "Switching to '$1'"
         git -C "$PORTDIR" switch "$1"
     else
          validFormatMsg
@@ -180,7 +180,7 @@ while [ "$#" -gt 0 ]; do
         QUARTAL="$2"
         shift 2
       else
-        echo "Please provide branch name for $1."
+        echo "Please provide branch name for '$1'."
         validFormatMsg
         exit 1
       fi
@@ -191,7 +191,7 @@ while [ "$#" -gt 0 ]; do
         overwritePortdir "$2"
         shift 2
       else
-        echo "No path provided for $1 flag."
+        echo "No path provided for '$1' flag."
         exit 1
       fi
       ;;
