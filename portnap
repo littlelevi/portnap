@@ -68,8 +68,9 @@ auto() {
 }
 
 validFormatMsg() {
-    echo "Examples of valid branch format are $YEAR@4 or just Q1,Q2,Q3,Q4."
+    echo "Examples of valid branch format are ${YEAR}Q4 or just Q1,Q2,Q3,Q4."
 }
+
 fetch() {
     portDirExist
     if parseSimpleFormat "$1"; then
